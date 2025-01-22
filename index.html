@@ -41,14 +41,23 @@
   <h1>Firebase Form</h1>
 <main>
 
-     <!-- نموذج تسجيل الدخول -->
+     <!-- نموذج اشترتاك الدخول -->
      <form id="authForm">
         <label for="email"> Email</label><br><br>
         <input type="email" id="email" placeholder="  your email" required /><br><br>
         <label for="password">كلمة المرور</label><br><br>
         <input type="password" id="password" placeholder=" paswwo your" required /><br><br>
-        <button type="button" id="signinBtn">تسجيل الدخول</button>
-        <button type="button" id="loginBtn">إنشاء حساب</button>
+        <button type="submit" id="signinBtn">إنشاء حساب</button>
+      </form>
+    </div>
+
+     <!-- نموذج اتسجيل الدخول -->
+     <form id="authFormlogin" >
+        <label for="email"> Email</label><br><br>
+        <input type="email" id="email2" placeholder="  your email" required /><br><br>
+        <label for="password">كلمة المرور</label><br><br>
+        <input type="password" id="password2" placeholder=" paswwo your" required /><br><br>
+        <button type="submit" id="loginBtn">تسجيل الدخول</button>
       </form>
     </div>
   
@@ -60,8 +69,10 @@
           <input type="text" id="productName" placeholder=" Product" required />
           <input type="number" id="productPrice" placeholder="Price " required />
           <input type="text" id="productDescription" placeholder=" Description" required />
-          <input type="text" id="productImage" placeholder="Image  " required />
-          <button type="button" id="addProductBtn">Add your product </button>
+          <input type="url" id="productImage" placeholder="Image  " required />
+          <button type="submit" id="addProductBtn">Add your product </button>
+       
+
         </form>
       </div>
     </main>
@@ -104,93 +115,208 @@
 
 
 <script type="module">
-    // استيراد وظائف Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDcxzNCPzEwXRdhvsHWiDS05s7NIxJRvQ",
+    authDomain: "myproject-bd31d.firebaseapp.com",
+    projectId: "myproject-bd31d",
+    storageBucket: "myproject-bd31d.firebasestorage.app",
+    messagingSenderId: "741804666337",
+    appId: "1:741804666337:web:b664185cba55c2ffc636a0",
+    measurementId: "G-92LD12HSF5"
+  };
 
-    // تكوين Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBDcxzNCPzEwXRdhvsHWiDS05s7NIxJRvQ",
-      authDomain: "myproject-bd31d.firebaseapp.com",
-      projectId: "myproject-bd31d",
-      storageBucket: "myproject-bd31d.firebasestorage.app",
-      messagingSenderId: "741804666337",
-      appId: "1:741804666337:web:b664185cba55c2ffc636a0"
-    };
+ 
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth();
+  const db=getFirestore(app);
 
-    // تهيئة Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // الحصول على عناصر HTML
-    const emailInput = document.getElementById("email");
+ 
+ 
+    // الحصول على عناصر HTML==========================================================================================================
+    const SingUpForm =document.getElementById("authForm")
+    const productForm =document.getElementById("productForm")
+const authFormlogin=document.getElementById("authFormlogin");
+      const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const signinBtn = document.getElementById("signinBtn");
-    const loginBtn = document.getElementById("loginBtn");
-    const productForm = document.getElementById("productForm");
+   
     const productName = document.getElementById("productName");
     const productPrice = document.getElementById("productPrice");
     const productDescription = document.getElementById("productDescription");
     const productImage = document.getElementById("productImage");
     const addProductBtn = document.getElementById("addProductBtn");
+    const updateProductBtn = document.getElementById("updateProductBtn");
+    const deletProductBtn = document.getElementById("deletProductBtn");
 
-    // تسجيل مستخدم جديد
-    loginBtn.addEventListener("click", async () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        alert("تم إنشاء الحساب بنجاح!");
-        productForm.style.display = "block";
-      } catch (error) {
-        alert("حدث خطأ: " + error.message);
-      }
+  // تسجيل مستخدم جديد==================================================================================================================================
+
+SingUpForm.addEventListener("submit" ,async(e)=>{
+e.preventDefault();
+const emailInput = document.getElementById("email").value;
+  const passwordInput = document.getElementById("password").value;
+  console.log(emailInput);
+
+  try{
+   const userCredential= await createUserWithEmailAndPassword(auth, emailInput, passwordInput);
+    const user = userCredential.user;
+    authFormlogin.style.display="block";
+console.log(user);
+  } 
+  catch(error){
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    alert(errorMessage );
+  };
+
+})
+
+
+authFormlogin.addEventListener("submit" ,async(e)=>{
+e.preventDefault();
+const emailInput2 = document.getElementById("email2").value;
+  const passwordInput2 = document.getElementById("password2").value;
+  console.log(emailInput2);
+
+  try{
+   const userCredential= await  signInWithEmailAndPassword(auth, emailInput2, passwordInput2);
+    const user = userCredential.user;
+    productForm.style.display="block";
+    console.log(user);
+    alert("welcome")
+  } 
+  catch(error){
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    alert(errorMessage ,"hala");
+  };
+
+})
+
+
+
+productForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const productName = document.getElementById("productName").value;
+  const productPrice = document.getElementById("productPrice").value;
+  const productDescription = document.getElementById("productDescription").value;
+  const productImage = document.getElementById("productImage").value;
+
+  try {
+    const docRef = await addDoc(collection(db, "products"), {
+      title: productName,
+      image: productImage,
+      description: productDescription,
+      price: productPrice,
+    });
+    console.log(docRef);
+
+
+
+    if (productName && productPrice && productDescription && productImage) {
+      // Add product card to the UI
+      const card = document.createElement("div");
+      const main = document.querySelector("main");
+      card.classList.add("card");
+      card.innerHTML = `
+        <img src="${productImage}" />
+        <h3>${productName}</h3>
+        <p>${productDescription}</p>
+        <p>السعر: $${productPrice}</p>
+      `;
+
+      const updateProductBtn = document.createElement("button");
+      updateProductBtn.id = "updateProductBtn";
+      updateProductBtn.textContent = "تحديث المنتج";
+
+      main.appendChild(card);
+      card.appendChild(updateProductBtn);
+
+      // Add event listener to the update button
+      updateProductBtn.addEventListener("click", async () => {
+        const updatedName = prompt("أدخل اسم المنتج الجديد:");
+
+        if (updatedName) {
+  try {
+    // تحديث اسم المنتج فقط في Firestore
+    await updateDoc(doc(db, "products", docRef.id), {
+      title: updatedName, // تحديث الاسم فقط
     });
 
-    // تسجيل الدخول
-    signinBtn.addEventListener("click", async () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
+    // تحديث اسم المنتج في واجهة المستخدم
+    card.querySelector("h3").textContent = updatedName;
 
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        alert("تم تسجيل الدخول بنجاح!");
-        productForm.style.display = "block";
-      } catch (error) {
-        alert("حدث خطأ: " + error.message);
-      }
-    });
-
-    // إضافة منتج
-    addProductBtn.addEventListener("click", () => {
-      const name = productName.value;
-      const price = parseFloat(productPrice.value);
-      const description = productDescription.value;
-      const image = productImage.value;
-
-      if (name && price && description && image) {
-        // إضافة المنتج إلى واجهة المستخدم (مثال)
-        const card = document.createElement("div");
-        const main= document.querySelector("main")
-        card.classList.add("card")
-        card.innerHTML = `
-          <img src="${image}" />
-          <h3>${name}</h3>
-          <p>${description}</p>
-          <p>السعر: $${price}</p>
-        `;
-
-        main.appendChild(card);
-
-        alert("تم إضافة المنتج بنجاح!");
-      } else {
-        alert("الرجاء تعبئة جميع الحقول!");
-      }
-    });
+    alert("تم تحديث المنتج بنجاح!");
+  } catch (e) {
+    console.error("حدث خطأ أثناء تحديث المنتج:", e);
+    alert("حدث خطأ أثناء تحديث المنتج. الرجاء المحاولة مرة أخرى.");
+  }
+} else {
+  alert("الرجاء إدخال اسم صالح للمنتج!");
+}
+      });
 
 
 
+      const deleteButton = document.createElement("button");
+deleteButton.textContent = "حذف المنتج";
+deleteButton.style.backgroundColor = "red";
+deleteButton.style.color = "white";
+deleteButton.style.border = "none";
+deleteButton.style.padding = "5px 10px";
+deleteButton.style.cursor = "pointer";
+
+// أضف الزر إلى واجهة المستخدم داخل البطاقة
+card.appendChild(deleteButton);
+
+// أضف مستمع حدث للزر
+deleteButton.addEventListener("click", async () => {
+  const confirmDelete = confirm("هل أنت متأكد أنك تريد حذف هذا المنتج؟");
+  if (confirmDelete) {
+    try {
+      // حذف المنتج من Firestore
+      await deleteDoc(doc(db, "products", docRef.id));
+
+      // إزالة البطاقة من واجهة المستخدم
+      card.remove();
+
+      alert("تم حذف المنتج بنجاح!");
+    } catch (e) {
+      console.error("حدث خطأ أثناء حذف المنتج:", e);
+      alert("حدث خطأ أثناء حذف المنتج. الرجاء المحاولة مرة أخرى.");
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+
+ 
+    } else {
+      alert("الرجاء تعبئة جميع الحقول!");
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+
+
+
+    
 </script>
 </body>
 </html> 
